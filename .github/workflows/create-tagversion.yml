@@ -1,0 +1,60 @@
+name: Create Repository Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: 'Nombre del repositorio (formato: owner/repo)'
+        required: true
+        type: string
+      tag_version:
+        description: 'Versión del tag (ejemplo: v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Permiso para escribir en el repositorio (necesario para crear tags)
+
+    steps:
+      # Checkout del repositorio especificado
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.inputs.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Validar formato de la versión del tag
+      - name: Validate tag version
+        run: |
+          if [[ ! "${{ github.event.inputs.tag_version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: La versión del tag debe seguir el formato vX.Y.Z (ejemplo: v1.0.0)"
+            exit 1
+          fi
+
+      # Configurar Git
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "actions@github.com"
+
+      # Verificar si el tag ya existe
+      - name: Check if tag exists
+        run: |
+          if git rev-parse "${{ github.event.inputs.tag_version }}" >/dev/null 2>&1; then
+            echo "Error: El tag ${{ github.event.inputs.tag_version }} ya existe en el repositorio"
+            exit 1
+          fi
+
+      # Crear y empujar el tag
+      - name: Create and push tag
+        run: |
+          git tag ${{ github.event.inputs.tag_version }}
+          git push origin ${{ github.event.inputs.tag_version }}
+
+      # Confirmación de éxito
+      - name: Success message
+        run: |
+          echo "Tag ${{ github.event.inputs.tag_version }} creado y empujado exitosamente al repositorio ${{ github.event.inputs.repository }}"
