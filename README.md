@@ -1,1 +1,2 @@
 # workflow-tools
+[![Create Repository Tag](https://github.com/Agnaldo-Cavaleiro/workflow-tools/actions/workflows/create-tagversion.yml/badge.svg)](https://github.com/Agnaldo-Cavaleiro/workflow-tools/actions/workflows/create-tagversion.yml)
