@@ -1,3 +1,4 @@
+
 name: Create Repository Tag
 
 on:
@@ -16,7 +17,7 @@ jobs:
   create-tag:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Permiso para escribir en el repositorio (necesario para crear tags)
+      contents: write  # Permiso para escribir en el repositorio
 
     steps:
       # Checkout del repositorio especificado
@@ -24,7 +25,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ github.event.inputs.repository }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}  # Usa el PAT en lugar de GITHUB_TOKEN
 
       # Validar formato de la versión del tag
       - name: Validate tag version
@@ -48,8 +49,10 @@ jobs:
             exit 1
           fi
 
-      # Crear y empujar el tag
+      # Crear y pushear el tag
       - name: Create and push tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}  # Usa el PAT para el push
         run: |
           git tag ${{ github.event.inputs.tag_version }}
           git push origin ${{ github.event.inputs.tag_version }}
